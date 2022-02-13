@@ -1,8 +1,5 @@
 #include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <string.h>
-#include <assert.h>
 #include "hash-table.h"
 
 static size_t str_hash(char const *s) {
