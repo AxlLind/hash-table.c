@@ -1,4 +1,4 @@
-TARGETS       := test
+TARGETS       := test fuzz
 CC            := gcc
 CFLAGS        := -I src -g -Wall -Wextra -Wpedantic -Wshadow -Werror -O3
 VALGRINDFLAGS := --leak-check=full --show-leak-kinds=all --track-origins=yes
