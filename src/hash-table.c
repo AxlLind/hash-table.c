@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <stdio.h>
 #include "hash-table.h"
 
 static size_t str_hash(char const *s) {
@@ -10,21 +12,22 @@ static size_t str_hash(char const *s) {
 }
 
 static int ht_insert_impl(ht_table *table, char *key, int val, int copy_key) {
-  for (size_t h = str_hash(key); ; h++) {
-    ht_node *node = table->table + (h % table->capacity);
-    if (!node->key) {
-      char *new_key = key;
-      if (copy_key) {
-        new_key = malloc(strlen(key)+1);
-        strcpy(new_key, key);
-      }
-      *node = (ht_node) { .key=new_key, .val=val, .deleted=0 };
-      table->len++;
-      return 1;
-    }
-    if (strcmp(node->key, key) == 0)
-      return 0;
+  if (ht_get(table, key)) // TODO: This is inefficient
+    return 0;
+
+  size_t h = str_hash(key);
+  while (table->table[h % table->capacity].key)
+    h++;
+
+  ht_node *node = table->table + (h % table->capacity);
+  char *new_key = key;
+  if (copy_key) {
+    new_key = malloc(strlen(key)+1);
+    strcpy(new_key, key);
   }
+  *node = (ht_node) { .key=new_key, .val=val, .deleted=0 };
+  table->len++;
+  return 1;
 }
 
 static void ht_expand(ht_table *table) {
@@ -68,6 +71,8 @@ int ht_remove(ht_table *table, char const *key) {
 int const* ht_get(ht_table *table, char const* key) {
   for (size_t h = str_hash(key); ; h++) {
     ht_node *node = table->table + (h % table->capacity);
+    if (node->deleted)
+      continue;
     if (!node->key)
       return NULL;
     if (strcmp(node->key, key) == 0)
