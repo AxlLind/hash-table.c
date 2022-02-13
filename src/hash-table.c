@@ -3,18 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-
-typedef struct {
-  char *key;
-  int val;
-  char deleted;
-} ht_node;
-
-typedef struct {
-  size_t len;
-  size_t capacity;
-  ht_node *table;
-} ht_table;
+#include "hash-table.h"
 
 static size_t str_hash(char const *s) {
   size_t hash = 7;
@@ -89,7 +78,7 @@ int const* ht_get(ht_table *table, char const* key) {
   }
 }
 
-ht_table ht_create() {
+ht_table ht_create(void) {
   return (ht_table) {
     .len = 0,
     .capacity = 8,
@@ -101,48 +90,4 @@ void ht_free(ht_table *table) {
   for (size_t i = 0; i < table->capacity; i++)
     free(table->table[i].key);
   free(table->table);
-}
-
-int main() {
-  ht_table table = ht_create();
-
-  assert(ht_insert(&table, "a", 0));
-  assert(ht_insert(&table, "ab", 1));
-  assert(ht_insert(&table, "abc", 2));
-  assert(ht_insert(&table, "abcd", 3));
-  assert(ht_insert(&table, "abcde", 4));
-  assert(ht_insert(&table, "abcdef", 5));
-  assert(ht_insert(&table, "abcdefg", 6));
-  assert(ht_insert(&table, "abcdefgh", 7));
-  assert(ht_insert(&table, "abcdefghi", 8));
-  assert(ht_insert(&table, "abcdefghij", 9));
-  assert(!ht_insert(&table, "abcdefghij", 10));
-  assert(table.len == 10);
-
-  assert(*ht_get(&table, "a") == 0);
-  assert(*ht_get(&table, "ab") == 1);
-  assert(*ht_get(&table, "abc") == 2);
-  assert(*ht_get(&table, "abcd") == 3);
-  assert(*ht_get(&table, "abcde") == 4);
-  assert(*ht_get(&table, "abcdef") == 5);
-  assert(*ht_get(&table, "abcdefg") == 6);
-  assert(*ht_get(&table, "abcdefgh") == 7);
-  assert(*ht_get(&table, "abcdefghi") == 8);
-  assert(*ht_get(&table, "abcdefghij") == 9);
-  assert(ht_get(&table, "aklsjdlkas") == NULL);
-
-  assert(ht_remove(&table, "a"));
-  assert(ht_remove(&table, "ab"));
-  assert(ht_remove(&table, "abc"));
-  assert(ht_remove(&table, "abcd"));
-  assert(ht_remove(&table, "abcde"));
-  assert(ht_remove(&table, "abcdef"));
-  assert(ht_remove(&table, "abcdefg"));
-  assert(ht_remove(&table, "abcdefgh"));
-  assert(ht_remove(&table, "abcdefghi"));
-  assert(ht_remove(&table, "abcdefghij"));
-  assert(!ht_remove(&table, "dsajlke"));
-  assert(table.len == 0);
-
-  ht_free(&table);
 }
